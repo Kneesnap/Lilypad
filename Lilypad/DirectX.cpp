@@ -21,20 +21,22 @@ bool bKeyPrev[255];
 bool bMenuEnabled = true;
 
 
-#define MENUITEMS 3
+#define MENUITEMS 4
 bool bMenuItems[MENUITEMS];
 int iSelectedItem = 0;
 wchar_t wMenuItems[MENUITEMS][255] =
 {
 	L"Collision Bypass",
 	L"Freeze Time",
-	L"Infinite Lives"
+	L"Infinite Lives",
+	L"Cave Bright",
 };
 
 void (*MenuToggles[])(BOOL) = {
 	ToggleCollisionBypass,
 	ToggleFreezeTime,
 	ToggleInfiniteLives,
+	ToggleCaveBright,
 };
 
 
