@@ -25,4 +25,4 @@ Setting this up with Visual Studio 2019 should be fairly easy:
 Run FrogLord: ``Run > Run 'FrogLord GUI'``  
 Create FrogLord.jar: ``Build > Build Artifacts... > FrogLord > Build``
 
-## NOTE: This project was based on a project included with a [tutorial](https://www.youtube.com/watch?v=i8Cn7fydNUA), but is a replacement for [FrogAPI](https://github.com/Kneesnap/FrogAPI).
+### NOTE: This project is based on a [tutorial project](https://www.youtube.com/watch?v=i8Cn7fydNUA), but is a replacement for [FrogAPI](https://github.com/Kneesnap/FrogAPI).
