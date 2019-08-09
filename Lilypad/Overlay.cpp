@@ -30,10 +30,7 @@ void OverlayFunctions::GetTargetWindow()
 {
 	Target.Window = FindWindow(0, "Frogger v3.0e");
 	if (!Target.Window)
-		Target.Window = FindWindow(0, "Frogger v3.0e - Paused");
-	if (!Target.Window)
 		Target.Window = FindWindow(0, "Frogger");
-	//TODO: Support other versions, and see if we can make something that always works.
 
 	if (Target.Window)
 	{  

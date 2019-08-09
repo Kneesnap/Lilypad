@@ -3,6 +3,7 @@
 #include "modulemgr.h"
 #include "main.h"
 #include "Hooks_reclass.h"
+#include "Hacks.h"
 
 directx_t DirectX;
 ID3DXFont* pFont;
@@ -25,10 +26,17 @@ bool bMenuItems[MENUITEMS];
 int iSelectedItem = 0;
 wchar_t wMenuItems[MENUITEMS][255] =
 {
-	L"Option 1",
-	L"Option 2",
-	L"EXIT"
+	L"Collision Bypass",
+	L"Freeze Time",
+	L"Infinite Lives"
 };
+
+void (*MenuToggles[])(BOOL) = {
+	ToggleCollisionBypass,
+	ToggleFreezeTime,
+	ToggleInfiniteLives,
+};
+
 
 void DrawString(char* String, int x, int y, int a, int r, int g, int b, ID3DXFont* font)
 {
@@ -167,49 +175,9 @@ void DirectxFunctions::RenderDirectX()
 
 			if (bKeys[VK_DELETE] || bKeys[VK_NEXT])
 			{
-				bMenuItems[iSelectedItem] = !bMenuItems[iSelectedItem];
-
-				//Option 1
-				if (iSelectedItem == 0)
-				{
-					if (bMenuItems[iSelectedItem] == true)
-					{
-						//ON CODE
-					}
-					else
-					{
-						//OFF
-
-					}
-				}
-
-				//Option 2
-				if (iSelectedItem == 1)
-				{
-					if (bMenuItems[iSelectedItem] == true)
-					{
-						//ON CODE
-					}
-					else
-					{
-						//OFF
-					}
-				}
-
-				//EXIT
-				if (iSelectedItem == 2)
-				{
-					if (bMenuItems[iSelectedItem] == true)
-					{
-						//ON CODE..we close the application
-						exit(0);
-
-					}
-					else
-					{
-						//OFF
-					}
-				}
+				bMenuItems[iSelectedItem] = !bMenuItems[iSelectedItem]; // Toggle recorded state.
+				if (MenuToggles[iSelectedItem] != NULL) // Run toggle logic.
+					MenuToggles[iSelectedItem](bMenuItems[iSelectedItem]);
 			}
 		}
 	}
@@ -381,5 +349,3 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 	}
 	return TRUE;
 }
-
-
