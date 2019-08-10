@@ -202,13 +202,13 @@ void DirectxFunctions::RenderDirectX()
 				pos.top += 16;
 			}
 
-			if (bKeys[VK_HOME] && iSelectedItem > 0)
+			if ((bKeys[VK_PRIOR] || bKeys[VK_HOME]) && iSelectedItem > 0)
 				iSelectedItem--;
 
-			if (bKeys[VK_END] && iSelectedItem < MENUITEMS - 1)
+			if ((bKeys[VK_NEXT] || bKeys[VK_END]) && iSelectedItem < MENUITEMS - 1)
 				iSelectedItem++;
 
-			if (bKeys[VK_DELETE] || bKeys[VK_NEXT])
+			if (bKeys[VK_DELETE])
 			{
 				bMenuItems[iSelectedItem] = !bMenuItems[iSelectedItem]; // Toggle recorded state.
 				if (MenuToggles[iSelectedItem] != NULL) // Run toggle logic.
