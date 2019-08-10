@@ -27,11 +27,11 @@ bool bMenuItems[MENUITEMS];
 int iSelectedItem = 0;
 wchar_t wMenuItems[MENUITEMS][255] =
 {
-	L"Collision Bypass",
-	L"Freeze Time",
-	L"Infinite Lives",
-	L"Cave Bright",
-	L"Freecam",
+	L"X: Collision Bypass",
+	L"T: Freeze Time",
+	L"V: Infinite Lives",
+	L"C: Cave Bright",
+	L"B: Freecam",
 };
 
 void (*MenuToggles[])(BOOL) = {
@@ -186,18 +186,17 @@ void DirectxFunctions::RenderDirectX()
 			pos.top += 20;
 
 			wchar_t swf[255];
-			wchar_t swf2[255];
 
 			for (int i = 0; i < MENUITEMS; i++)
 			{
 				D3DCOLOR color;
-				if (iSelectedItem == i)
+				if (bMenuItems[i])
+					color = D3DCOLOR_ARGB(237, 85, 255, 85);
+				else if (iSelectedItem == i)
 					color = D3DCOLOR_ARGB(237, 243, 243, 24);
 				else
 					color = D3DCOLOR_ARGB(237, 198, 24, 24);
 				swprintf(swf, wMenuItems[i]);
-				swprintf(swf2, L" %s", bMenuItems[i] ? L"ON" : L"OFF");
-				wcscat(swf, swf2);
 				DirectX.Font->DrawTextW(NULL, swf, -1, &pos, 0, color);
 
 				pos.top += 16;
