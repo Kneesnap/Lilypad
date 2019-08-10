@@ -24,6 +24,8 @@ struct directx_t
 	ID3DXLine * Line;
 };
 
+extern bool bPressedKeys[255];
+extern bool bKeys[255];
 extern directx_t DirectX;
 
 namespace DirectxFunctions

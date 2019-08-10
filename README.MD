@@ -5,7 +5,7 @@ Lilypad is a tool for Frogger (1997). It allows fan to cheat or enable tools lik
 To use this tool, you must have a copy of the game. It is restricted to the PC version.
 
 ## Screenshots:
-TODO
+![Example Screenshot](https://i.imgur.com/sYICQrr.png)
 
 ## Usage:
 Download: [here](https://github.com/Kneesnap/Lilypad/releases)  

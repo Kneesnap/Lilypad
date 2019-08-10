@@ -15,13 +15,14 @@ RECT rc;
 
 bool bInitialized = false;
 
+bool bPressedKeys[255];
 bool bKeys[255];
 bool bKeyPrev[255];
 
 bool bMenuEnabled = true;
 
 
-#define MENUITEMS 4
+#define MENUITEMS 5
 bool bMenuItems[MENUITEMS];
 int iSelectedItem = 0;
 wchar_t wMenuItems[MENUITEMS][255] =
@@ -30,6 +31,7 @@ wchar_t wMenuItems[MENUITEMS][255] =
 	L"Freeze Time",
 	L"Infinite Lives",
 	L"Cave Bright",
+	L"Freecam",
 };
 
 void (*MenuToggles[])(BOOL) = {
@@ -37,6 +39,15 @@ void (*MenuToggles[])(BOOL) = {
 	ToggleFreezeTime,
 	ToggleInfiniteLives,
 	ToggleCaveBright,
+	ToggleFreecam,
+};
+
+void (*MenuUpdate[])() = {
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	UpdateFreecam,
 };
 
 
@@ -101,11 +112,14 @@ void DirectxFunctions::DirectXInit(HWND hwnd)
 
 void DirectxFunctions::RenderDirectX()
 {
+	int i;
+
 	DirectX.Device->BeginScene();
 	if (GetForegroundWindow() == Target.Window)
 	{
 		for (int i = 0; i < 255; i++)
 		{
+
 			if (GetAsyncKeyState(i) != 0)
 			{
 				if (bKeyPrev[i] == false)
@@ -117,17 +131,23 @@ void DirectxFunctions::RenderDirectX()
 				{
 					bKeys[i] = false;
 				}
+				bPressedKeys[i] = true;
 			}
 			else
 			{
 				bKeys[i] = false;
 				bKeyPrev[i] = false;
+				bPressedKeys[i] = false;
 			}
 		}
+
 		if (bKeys[VK_INSERT])
-		{
-			bMenuEnabled = !bMenuEnabled;
-		}
+			bMenuEnabled = !bMenuEnabled; // Toggle the menu being displayed.
+		
+		// Call update hooks for enabled hacks.
+		for (i = 0; i < MENUITEMS; i++)
+			if (bMenuItems[i] && MenuUpdate[i] != NULL)
+				MenuUpdate[i]();
 
 		if (bMenuEnabled)
 		{
@@ -144,9 +164,9 @@ void DirectxFunctions::RenderDirectX()
 			pos.top = 20;
 
 			//bg
-			Drawing::FilledRect(18, 20, 205, 80, D3DCOLOR_ARGB(5, 255, 0, 0));
+			Drawing::FilledRect(18, 20, 205, (20 * MENUITEMS) + 3, D3DCOLOR_ARGB(5, 255, 0, 0));
 			//outer rect
-			Drawing::BorderedRect(17, 19, 205, 80, 1, 1, 1, 1, D3DCOLOR_ARGB(255, 255, 255, 255));
+			Drawing::BorderedRect(17, 19, 205, (20 * MENUITEMS) + 3, 1, 1, 1, 1, D3DCOLOR_ARGB(255, 255, 255, 255));
 			Drawing::FilledRect(17, 19, 205, 19, D3DCOLOR_ARGB(255, 255, 255, 255));
 			DirectX.Font->DrawTextW(NULL, L"Lilypad - By Kneesnap", -1, &pos, 0, D3DCOLOR_ARGB(255, 5, 5, 5));
 			pos.top += 20;
