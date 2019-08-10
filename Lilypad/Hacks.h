@@ -27,7 +27,7 @@ struct FreecamOffset {
 	int valueChange;
 	int alternate;
 	bool target;
-	void* valuePointer;
+	int value;
 };
 
 #define VK_KEY_0	0x30 /* '0' key */

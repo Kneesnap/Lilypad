@@ -92,8 +92,6 @@ void ToggleCaveBright(BOOL new_state) {
 	}
 }
 
-int camX, camY, camZ;
-short targetX, targetY, targetZ;
 FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 	{
 		0x497164, // ca_current.vx
@@ -102,7 +100,7 @@ FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 		25,
 		CAMERA_Z,
 		false,
-		&camX
+		0
 	},
 	{
 		0x497168, // ca_current.vy
@@ -111,7 +109,7 @@ FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 		25,
 		-1,
 		false,
-		&camY
+		0
 	},
 	{
 		0x49716C, // ca_current.vz
@@ -120,7 +118,7 @@ FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 		25,
 		CAMERA_X,
 		false,
-		&camZ
+		0
 	},
 	{
 		0x497144, // ca_next_target_ofs.vx
@@ -129,7 +127,7 @@ FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 		7,
 		TARGET_Y,
 		true,
-		&targetX
+		0
 	},
 	{
 		0x497146, // ca_next_target_ofs.vy
@@ -138,7 +136,7 @@ FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 		-7,
 		-1,
 		true,
-		&targetY
+		0
 	},
 	{
 		0x497148, // ca_next_target_ofs.vz
@@ -147,7 +145,7 @@ FreecamOffset FreecamOffsets[FREECAM_OFFSET_TYPE_LENGTH] = {
 		7,
 		TARGET_X,
 		true,
-		&targetZ
+		0
 	}
 };
 
@@ -155,6 +153,7 @@ int GetFreeCamAddress(FreecamOffsetType offsetType) {
 	return FreecamOffsets[offsetType].address;
 }
 
+int OldFreecamData[FREECAM_OFFSET_TYPE_LENGTH];
 void ToggleFreecam(BOOL new_state) {
 	FreecamOffset* offset;
 	int i;
@@ -163,9 +162,19 @@ void ToggleFreecam(BOOL new_state) {
 		for (i = 0; i < FREECAM_OFFSET_TYPE_LENGTH; i++) { // Load camera data.
 			offset = &FreecamOffsets[i];
 			if (offset->target) {
-				*((short*) offset->valuePointer) = ReadShort(offset->address);
+				offset->value = (int) ReadShort(offset->address);
 			} else {
-				*((int*)offset->valuePointer) = ReadInteger(offset->address);
+				offset->value = ReadInteger(offset->address);
+			}
+			OldFreecamData[i] = offset->value;
+		}
+	} else { // Disable.
+		for (i = 0; i < FREECAM_OFFSET_TYPE_LENGTH; i++) { // Apply old camera data.
+			offset = &FreecamOffsets[i];
+			if (offset->target) {
+				WriteShort(offset->address, (short)OldFreecamData[i]);
+			} else {
+				WriteInteger(offset->address, OldFreecamData[i]);
 			}
 		}
 	}
@@ -197,14 +206,7 @@ void handleMove(int type, int rotation) {
 	valueChange = (bPressedKeys[iKey] ? self->valueChange : 0) - (bPressedKeys[dKey] ? self->valueChange : 0);
 
 	//TODO: Maybe camera bounds fix.
-
-	if (self->target) {
-		*((short*)self->valuePointer) += (short) valueChange;
-	} else {
-		*((int*)self->valuePointer) += valueChange;
-	}
-
-
+	self->value += valueChange;
 }
 
 void UpdateFreecam() {
@@ -220,9 +222,9 @@ void UpdateFreecam() {
 		handleMove(i, rotation);
 
 		if (offset.target) {
-			WriteShort(offset.address, *((short*)offset.valuePointer));
+			WriteShort(offset.address, (short)offset.value);
 		} else {
-			WriteInteger(offset.address, *((int*)offset.valuePointer));
+			WriteInteger(offset.address, offset.value);
 		}
 	}
 }
@@ -230,5 +232,3 @@ void UpdateFreecam() {
 
 //TODO: Make easier to inject and work.
 //TODO: Further modularize modules.
-//TODO: Make the controls more clear.
-//TODO: Copy camera data from before we started.
