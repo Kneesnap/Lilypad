@@ -230,4 +230,5 @@ void UpdateFreecam() {
 
 //TODO: Make easier to inject and work.
 //TODO: Further modularize modules.
-//TODO: Keybinds toggle.
+//TODO: Make the controls more clear.
+//TODO: Copy camera data from before we started.

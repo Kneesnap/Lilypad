@@ -50,6 +50,14 @@ void (*MenuUpdate[])() = {
 	UpdateFreecam,
 };
 
+int KeyBinds[MENUITEMS] = {
+	VK_KEY_X,
+	VK_KEY_T,
+	VK_KEY_V,
+	VK_KEY_C,
+	VK_KEY_B
+};
+
 
 void DrawString(char* String, int x, int y, int a, int r, int g, int b, ID3DXFont* font)
 {
@@ -145,9 +153,15 @@ void DirectxFunctions::RenderDirectX()
 			bMenuEnabled = !bMenuEnabled; // Toggle the menu being displayed.
 		
 		// Call update hooks for enabled hacks.
-		for (i = 0; i < MENUITEMS; i++)
+		for (i = 0; i < MENUITEMS; i++) {
 			if (bMenuItems[i] && MenuUpdate[i] != NULL)
 				MenuUpdate[i]();
+			if (KeyBinds[i] != -1 && bKeys[KeyBinds[i]]) { // If a keybind is pressed, toggle hack.
+				bMenuItems[i] = !bMenuItems[i]; // Toggle recorded state.
+				if (MenuToggles[i] != NULL) // Run toggle logic.
+					MenuToggles[i](bMenuItems[i]);
+			}
+		}
 
 		if (bMenuEnabled)
 		{
