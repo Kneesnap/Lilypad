@@ -1,10 +1,11 @@
 #include "Overlay.h"
-// https://guidedhacking.com/threads/skyrim-hack-tutorial-series-esp-entitylist-noclip.13072/
 
 HINSTANCE hInstance;
 HANDLE pHandle;
 DWORD pid;
 DWORD Module;
+
+bool setup = false;
 
 void OverlayFunctions::CreateClass(WNDPROC winproc, char * windowname)
 {
@@ -30,10 +31,23 @@ void OverlayFunctions::GetTargetWindow()
 {
 	Target.Window = FindWindow(0, "Frogger v3.0e");
 	if (!Target.Window)
-		Target.Window = FindWindow(0, "Frogger");
+		Target.Window = FindWindow(0, "Frogger ");
+
+	if (!setup && Target.Window != NULL) {
+		setup = true;
+		SetupFrogger1997();
+	}
+
+	if (!Target.Window) { // Try Frogger 2.
+		Target.Window = FindWindow(0, "Frogger2");
+		if (Target.Window && !setup) {
+			setup = true;
+			SetupFrogger2();
+		}
+	}
 
 	if (Target.Window)
-	{  
+	{
 		GetWindowThreadProcessId(Target.Window, &pid);
 		pHandle = ProcessFunctions::GetHandle();
 		Target.Checked = true;

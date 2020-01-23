@@ -28,6 +28,8 @@ extern bool bPressedKeys[255];
 extern bool bKeys[255];
 extern directx_t DirectX;
 
+extern void SetupMenu(wchar_t menuNames[][255], void (*toggleFunctions[])(BOOL), void (*updateFunctions[])(), int keyBinds[], int menuItemCount);
+
 namespace DirectxFunctions
 {
 	void DirectXInit(HWND hwnd);

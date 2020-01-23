@@ -10,6 +10,8 @@
 #include <io.h>
 #include <Fcntl.h>
 #include <TlHelp32.h>
+#include "Hacks.h"
+#include "Frogger2.h"
 
 #pragma comment(lib, "dwmapi.lib")
 

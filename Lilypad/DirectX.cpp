@@ -3,7 +3,6 @@
 #include "modulemgr.h"
 #include "main.h"
 #include "Hooks_reclass.h"
-#include "Hacks.h"
 
 directx_t DirectX;
 ID3DXFont* pFont;
@@ -22,42 +21,27 @@ bool bKeyPrev[255];
 bool bMenuEnabled = true;
 
 
-#define MENUITEMS 5
-bool bMenuItems[MENUITEMS];
+int itemCount = 0;
+bool bMenuItems[255];
 int iSelectedItem = 0;
-wchar_t wMenuItems[MENUITEMS][255] =
-{
-	L"X: Collision Bypass",
-	L"T: Freeze Time",
-	L"V: Infinite Lives",
-	L"C: Cave Bright",
-	L"B: Freecam",
-};
+wchar_t* wMenuItems[255][255];
 
-void (*MenuToggles[])(BOOL) = {
-	ToggleCollisionBypass,
-	ToggleFreezeTime,
-	ToggleInfiniteLives,
-	ToggleCaveBright,
-	ToggleFreecam,
-};
+void (*MenuToggles[])(BOOL);
+void (*MenuUpdate[])();
 
-void (*MenuUpdate[])() = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	UpdateFreecam,
-};
+int KeyBinds[255];
 
-int KeyBinds[MENUITEMS] = {
-	VK_KEY_X,
-	VK_KEY_T,
-	VK_KEY_V,
-	VK_KEY_C,
-	VK_KEY_B
-};
+void SetupMenu(wchar_t menuNames[][255], void (*toggleFunctions[])(BOOL), void (*updateFunctions[])(), int keyBinds[], int menuItemCount) {
+	int i;
 
+	itemCount = menuItemCount;
+	for (i = 0; i < menuItemCount; i++)
+		*wMenuItems[i] = menuNames[i];
+	*MenuToggles = *toggleFunctions;
+	*MenuUpdate = *updateFunctions;
+	for (i = 0; i < menuItemCount; i++)
+		KeyBinds[i] = keyBinds[i];
+}
 
 void DrawString(char* String, int x, int y, int a, int r, int g, int b, ID3DXFont* font)
 {
@@ -153,7 +137,7 @@ void DirectxFunctions::RenderDirectX()
 			bMenuEnabled = !bMenuEnabled; // Toggle the menu being displayed.
 		
 		// Call update hooks for enabled hacks.
-		for (i = 0; i < MENUITEMS; i++) {
+		for (i = 0; i < itemCount; i++) {
 			if (bMenuItems[i] && MenuUpdate[i] != NULL)
 				MenuUpdate[i]();
 			if (KeyBinds[i] != -1 && bKeys[KeyBinds[i]]) { // If a keybind is pressed, toggle hack.
@@ -178,16 +162,16 @@ void DirectxFunctions::RenderDirectX()
 			pos.top = 20;
 
 			//bg
-			Drawing::FilledRect(18, 20, 205, (20 * MENUITEMS) + 3, D3DCOLOR_ARGB(5, 255, 0, 0));
+			Drawing::FilledRect(18, 20, 205, (20 * (itemCount + 1)) + 3, D3DCOLOR_ARGB(5, 255, 0, 0));
 			//outer rect
-			Drawing::BorderedRect(17, 19, 205, (20 * MENUITEMS) + 3, 1, 1, 1, 1, D3DCOLOR_ARGB(255, 255, 255, 255));
+			Drawing::BorderedRect(17, 19, 205, (20 * (itemCount + 1)) + 3, 1, 1, 1, 1, D3DCOLOR_ARGB(255, 255, 255, 255));
 			Drawing::FilledRect(17, 19, 205, 19, D3DCOLOR_ARGB(255, 255, 255, 255));
 			DirectX.Font->DrawTextW(NULL, L"Lilypad - By Kneesnap", -1, &pos, 0, D3DCOLOR_ARGB(255, 5, 5, 5));
 			pos.top += 20;
 
 			wchar_t swf[255];
 
-			for (int i = 0; i < MENUITEMS; i++)
+			for (int i = 0; i < itemCount; i++)
 			{
 				D3DCOLOR color;
 				if (bMenuItems[i])
@@ -196,7 +180,7 @@ void DirectxFunctions::RenderDirectX()
 					color = D3DCOLOR_ARGB(237, 243, 243, 24);
 				else
 					color = D3DCOLOR_ARGB(237, 198, 24, 24);
-				swprintf(swf, wMenuItems[i]);
+				swprintf(swf, *wMenuItems[i]);
 				DirectX.Font->DrawTextW(NULL, swf, -1, &pos, 0, color);
 
 				pos.top += 16;
@@ -205,7 +189,7 @@ void DirectxFunctions::RenderDirectX()
 			if ((bKeys[VK_PRIOR] || bKeys[VK_HOME]) && iSelectedItem > 0)
 				iSelectedItem--;
 
-			if ((bKeys[VK_NEXT] || bKeys[VK_END]) && iSelectedItem < MENUITEMS - 1)
+			if ((bKeys[VK_NEXT] || bKeys[VK_END]) && iSelectedItem < itemCount - 1)
 				iSelectedItem++;
 
 			if (bKeys[VK_DELETE])
@@ -355,23 +339,11 @@ DWORD WINAPI ThreadProc(LPVOID lpParam)
 			DispatchMessage(&Overlay.Message);
 			TranslateMessage(&Overlay.Message);
 		}
-		Sleep(1);
+		Sleep(1); //TODO: See if removing this makes things more smooth.
 		OverlayFunctions::GetTargetWindow();
 	}
 
 	return 0;
-}
-
-DWORD WINAPI InitiateHooks(LPVOID param)
-{
-	//entityhook
-	DWORD entityAddy = FindPattern("TESV.exe",
-		"\x00\x00\x00", "xxx");
-	MsgBoxAddy(entityAddy);
-	//EntlistJmpBack = entityAddy + 0x6;
-	//PlaceJMP((BYTE*)entityAddy, (DWORD)entityhook, 6);
-
-	return NULL;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
@@ -380,7 +352,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 	{
 		hInstance = hModule;
 		CreateThread(0, NULL, ThreadProc, (LPVOID)L"X", NULL, NULL);
-		//CreateThread(0, 0, InitiateHooks, 0, 0, 0);
 	}
 	return TRUE;
 }
